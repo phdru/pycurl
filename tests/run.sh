@@ -26,4 +26,8 @@ if test "$CI" = true; then
 fi
 
 $PYTHON -c 'import pycurl; print(pycurl.version)'
-$PYTEST -v
+if [ "`$PYTHON -c 'import sys; print(sys.version_info[0])'`" -eq 2 ]; then
+  $PYTEST -v --ignore=tests/multi_callback_test.py # Python3-only test
+else
+  $PYTEST -v
+fi
