@@ -6,7 +6,10 @@ import os.path
 import pycurl
 import sys
 import unittest
-import urllib.request
+try:
+    from urllib.request import pathname2url
+except ImportError:
+    from urllib import pathname2url
 
 class WriteAbortTest(unittest.TestCase):
     def setUp(self):
@@ -29,7 +32,7 @@ class WriteAbortTest(unittest.TestCase):
 
     def check(self, write_cb):
         # download the script itself through the file:// protocol into write_cb
-        url = 'file:' + urllib.request.pathname2url(os.path.abspath(__file__))
+        url = 'file:' + pathname2url(os.path.abspath(__file__))
         self.curl.setopt(pycurl.URL, url)
         self.curl.setopt(pycurl.WRITEFUNCTION, write_cb)
         try:
