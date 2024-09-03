@@ -934,6 +934,38 @@ do_multi_select(CurlMultiObject *self, PyObject *args)
 }
 
 
+/* --------------- wait --------------- */
+
+static PyObject *
+do_multi_wait(CurlMultiObject *self, PyObject *args)
+{
+    PyObject *extra_fds;
+    int timeout_ms, numfds;
+    CURLMcode res;
+
+    if (!PyArg_ParseTuple(args, "Oi:wait", &extra_fds, &timeout_ms)) {
+        return NULL;
+    }
+    if (check_multi_state(self, 1 | 2, "wait") != 0) {
+        return NULL;
+    }
+    if (extra_fds != Py_None) {
+        PyErr_SetString(PyExc_ValueError, "extra_fds is not implemented and must be None");
+        return NULL;
+    }
+
+    /* Allow threads because callbacks can be invoked */
+    PYCURL_BEGIN_ALLOW_THREADS
+    res = curl_multi_wait(self->multi_handle, NULL, 0, timeout_ms, &numfds);
+    PYCURL_END_ALLOW_THREADS
+    if (res != CURLM_OK) {
+        CURLERROR_MSG("curl_multi_wait() failed");
+    }
+
+    return PyInt_FromLong(numfds);
+}
+
+
 static PyObject *do_curlmulti_getstate(CurlMultiObject *self, PyObject *Py_UNUSED(ignored))
 {
     PyErr_SetString(PyExc_TypeError, "CurlMulti objects do not support serialization");
@@ -967,6 +999,7 @@ PYCURL_INTERNAL PyMethodDef curlmultiobject_methods[] = {
     {"assign", (PyCFunction)do_multi_assign, METH_VARARGS, multi_assign_doc},
     {"remove_handle", (PyCFunction)do_multi_remove_handle, METH_VARARGS, multi_remove_handle_doc},
     {"select", (PyCFunction)do_multi_select, METH_VARARGS, multi_select_doc},
+    {"wait", (PyCFunction)do_multi_wait, METH_VARARGS, multi_wait_doc},
     {"__getstate__", (PyCFunction)do_curlmulti_getstate, METH_NOARGS, NULL},
     {"__setstate__", (PyCFunction)do_curlmulti_setstate, METH_VARARGS, NULL},
     {NULL, NULL, 0, NULL}
