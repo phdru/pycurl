@@ -25,5 +25,8 @@ if test "$CI" = true; then
   fi
 fi
 
+$PYTHON -c 'import flaky, flask, pytest' 2>/dev/null ||
+    $PYTHON -m pip install --upgrade --compile flaky flask pytest
+
 $PYTHON -c 'import pycurl; print(pycurl.version)'
 $PYTEST -v
