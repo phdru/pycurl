@@ -126,8 +126,9 @@ install install_lib:
 	$(PYTHON) setup.py $@
 
 clean:
-	-rm -rf build dist
-	-rm -f *.pyc *.pyo */*.pyc */*.pyo */*/*.pyc */*/*.pyo
+	-rm -rf build dist pycurl.egg-info
+	-find . -name '*.py[co]' -delete
+	-find . -name __pycache__ -type d -delete
 	-rm -f MANIFEST
 	-rm -f src/allpycurl.c $(GEN_SOURCES)
 
